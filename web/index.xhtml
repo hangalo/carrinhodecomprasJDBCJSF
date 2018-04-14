@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Carrinho de compras</title>
+        <h:outputStylesheet library="css" name="estilos.css"/>
+    </h:head>
+    <h:body>
+        <h:graphicImage library="imagens" name="onlineshoppingcart.png"  styleClass="center-img"/>
+
+        <h:form style="margin-top: 20px">
+
+            <h:panelGroup>
+                <h:panelGrid columns="1" style="margin-bottom: 20px; color:#66DDFF; font-weight:bold">
+                    <p:outputLabel value=" Escolha a Categoria do Produto:" />
+                    <p:selectOneMenu style="width:250px" id="categorias" filter="true" filterMatchMode="startsWith" label="Categoria" value="#{produtoMBean.categoria}" required="true" converter="categoriaConverter">
+                        <f:selectItem itemLabel="--Seleccionar Categoria--" value="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{categoriaMBean.categorias}" var="categoria" itemValue="#{categoria}" itemLabel="#{categoria.descricao}"/>
+                        <f:ajax listener="#{produtoMBean.carregarProdutosDaCategoria()}" render="produtos"/>
+                    </p:selectOneMenu>
+                </h:panelGrid>
+            </h:panelGroup>
+
+
+
+            <h4 class="center-text"> Produtos disponiveis</h4>
+            <p:dataTable id="produtos" var="p" value="#{produtoMBean.produtosCategorias}" >
+                <p:column>
+                    <f:facet name="header">Código</f:facet>
+                    <h:outputText value="#{p.idProduto}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header"> Nome</f:facet>
+                    <h:outputText value="#{p.nomeProduto}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header"> Preço</f:facet>
+                    <h:outputText value="#{p.precoProduto}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header"> Quantidade</f:facet>
+                    <h:outputText value="#{p.quantidade}"/>
+                </p:column>
+                <p:column>
+                    <f:facet name="header">Comprar</f:facet>
+                    <h:commandButton value="Adicionar no Carrinho" action="#{carrinhoBean.addicionarProdutoCarrinho(p)}"/>
+                </p:column>
+
+            </p:dataTable>      
+
+
+
+
+
+        </h:form>
+        <h:panelGroup>
+            <h:form>
+                <p:commandButton icon="btnCarrinho" value="Ver Carrinho" oncomplete="PF('dialogClienteCreate').show()"/>
+            </h:form>
+        </h:panelGroup>
+
+        <h:form id="formCarrinho">
+            <p:dialog header="Carrinho de compras" widgetVar="dialogClienteCreate" modal="true" width="90%">
+
+                <h:panelGrid columns="2" style="width: 100%">
+                    <p:panel header="Carrinho">
+                        <h:panelGrid columns="1">
+                            <p:dataTable value="#{carrinhoBean.carrinho}" var="i">
+
+                                <p:column headerText="Nome">
+                                    <h:outputText value="#{i.produto.nomeProduto}"/>
+                                </p:column>
+
+                                <p:column headerText="Preço">
+                                    <h:outputText value="#{i.produto.precoProduto}"/>
+                                </p:column>
+
+                                <p:column headerText="Qtde">
+                                    <h:outputText value="#{i.quantidade}"/>
+                                </p:column>
+
+                                <p:column>
+                                    <f:facet name="header">Sub Total</f:facet>
+                                    <h:outputText value="#{i.produto.precoProduto * i.quantidade}"/>
+                                </p:column> 
+
+                                <p:column headerText="Operacao">
+                                    <h:link value="Delete" outcome="carrinho"/>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGrid>
+                        <h3 style="color: #66DD99">
+                            <br></br>
+                            Total a pagar: #{carrinhoBean.suma()}
+
+                        </h3>
+                    </p:panel>
+
+                    <h:panelGrid columns="1" style="margin-left: 12px;">
+                        <p:panel header="Factura">
+                            <h:panelGrid columns="1">
+                                <h:outputLabel value="Data:"/>
+                                <h:inputText value="#{facturaMBean.factura.dataFactura}" size="6" style="text-align: center">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:inputText>        
+
+                            </h:panelGrid>
+                            <h:panelGrid columns="1" style="width:200px">
+                                <p:outputLabel value="Cliente:" />
+                                <p:selectOneMenu style="width:300px" id="cliente" filter="true" filterMatchMode="startsWith" label="Categoria" value="#{facturaMBean.factura.cliente}" required="true" converter="clienteConverter">
+                                    <f:selectItem itemLabel="--Seleccionar Cliente--" value="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{clienteMBean.clientes}" var="cliente" itemValue="#{cliente}" itemLabel="#{cliente.idCliente} - #{cliente.nome}"/>
+
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+
+                        </p:panel>
+
+                    </h:panelGrid>
+
+                </h:panelGrid>
+
+
+                <h:form>
+                    <h:commandButton value="Registar compra"   action="#{carrinhoBean.registarCompra()}"/>
+
+                </h:form>
+            </p:dialog>
+
+        </h:form>
+    </h:body>
+</html>
+
